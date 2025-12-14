@@ -5,6 +5,8 @@ import { MemoryModule } from './memory/memory.module';
 
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       },
     }),
     MemoryModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { User } from '../../user/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class Memory {
@@ -8,7 +9,7 @@ export class Memory {
   @Column('text')
   text: string;
 
-  @Column({ nullable: true })
+  @Column('longtext', { nullable: true })
   imageUrl: string;
 
   @Column({ type: 'date' })
@@ -16,4 +17,11 @@ export class Memory {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true }) // Nullable for migration (existing data has no user)
+  userId: number;
+
+  @ManyToOne(() => User, (user) => user.memories, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }

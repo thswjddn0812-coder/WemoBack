@@ -12,11 +12,15 @@ export class MemoryService {
     private memoryRepository: Repository<Memory>,
   ) {}
 
-  create(createMemoryDto: CreateMemoryDto) {
-    return this.memoryRepository.save(createMemoryDto);
+  create(createMemoryDto: CreateMemoryDto, user: any) {
+    const memory = this.memoryRepository.create({
+      ...createMemoryDto,
+      user: { id: user.userId }, // Associate with user using ID
+    });
+    return this.memoryRepository.save(memory);
   }
 
-  async getMemoryCounts(yearMonth: string) {
+  async getMemoryCounts(yearMonth: string, user: any) {
     // yearMonth format: "YYYY-MM"
     const startDate = `${yearMonth}-01`;
     // MySQL-specific query
@@ -25,6 +29,7 @@ export class MemoryService {
       .select('memory.date', 'date')
       .addSelect('COUNT(*)', 'count')
       .where('memory.date LIKE :yearMonth', { yearMonth: `${yearMonth}%` })
+      .andWhere('memory.userId = :userId', { userId: user.userId })
       .groupBy('memory.date')
       .getRawMany();
 
@@ -44,27 +49,28 @@ export class MemoryService {
     }, {});
   }
 
-  findAll(date?: string) {
-    if (date) {
+  findAll(date: string | undefined, user: any) {
+    if (date && date !== 'all') {
       return this.memoryRepository.find({
-        where: { date: date },
+        where: { date: date, user: { id: user.userId } },
         order: { createdAt: 'DESC' },
       });
     }
     return this.memoryRepository.find({
+      where: { user: { id: user.userId } },
       order: { createdAt: 'DESC' },
     });
   }
 
-  findOne(id: number) {
-    return this.memoryRepository.findOneBy({ id });
+  findOne(id: number, user: any) {
+    return this.memoryRepository.findOne({ where: { id, user: { id: user.userId } } });
   }
 
-  update(id: number, updateMemoryDto: UpdateMemoryDto) {
-    return this.memoryRepository.update(id, updateMemoryDto);
+  update(id: number, updateMemoryDto: UpdateMemoryDto, user: any) {
+    return this.memoryRepository.update({ id, user: { id: user.userId } }, updateMemoryDto);
   }
 
-  remove(id: number) {
-    return this.memoryRepository.delete(id);
+  remove(id: number, user: any) {
+    return this.memoryRepository.delete({ id, user: { id: user.userId } });
   }
 }
